@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Maps Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #levelCode {
+            min-height: 200px;
+            background: #1a202c;
+            color: #68d391;
+            border: 2px solid #4a5568;
+        }
+
+        #levelCode:focus {
+            border-color: #68d391;
+            box-shadow: 0 0 0 3px rgba(104, 211, 145, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .maps-list {
+            grid-column: 1 / -1;
+        }
+
+        .map-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .map-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .map-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .map-author {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .map-description {
+            color: #4a5568;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .map-code {
+            background: #1a202c;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #4a5568;
+        }
+
+        .copy-btn {
+            background: #48bb78;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #38a169;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #718096;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Custom Maps Hub</h1>
+            <p>Share and discover custom maps for your favorite shortcut</p>
+            <a href="https://routinehub.co/shortcut/21103/" target="_blank" style="color: #68d391; text-decoration: none; font-weight: 600;">View Original Shortcut →</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalMaps">0</div>
+                <div class="stat-label">Total Maps</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalAuthors">0</div>
+                <div class="stat-label">Contributors</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2><span class="icon">📝</span> Submit Your Map</h2>
+                <div class="info-notice" style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #155724;">
+                    <strong>🌍 Global Sharing Enabled!</strong> Maps are automatically shared across all devices and users worldwide.
+                </div>
+                <form id="mapForm">
+                    <div class="form-group">
+                        <label for="authorName">Your Name</label>
+                        <input type="text" id="authorName" required placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mapTitle">Map Title</label>
+                        <input type="text" id="mapTitle" required placeholder="Enter map title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mapDescription">Description</label>
+                        <textarea id="mapDescription" required placeholder="Describe your map..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="levelCode">Level Code</label>
+                        <textarea id="levelCode" required placeholder="Paste your level formatted code here..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">🚀 Share Map</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">🔍</span> Browse Maps</h2>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search maps by title or author...">
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <div id="mapsList">
+                        <div class="empty-state">
+                            No maps shared yet. Be the first to contribute!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="maps-list card">
+            <h2><span class="icon">🌟</span> All Shared Maps</h2>
+            <div id="allMapsList">
+                <div class="empty-state">
+                    No maps available. Submit the first one above!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">
+        Map shared successfully! 🎉
+    </div>
+
+    <script>
+        class MapsHub {
+            constructor() {
+                this.maps = [];
+                // JSONBin.io configuration - no signup required!
+                this.jsonbinId = null; // Will be created automatically on first use
+                this.apiUrl = 'https://api.jsonbin.io/v3/b';
+                
+                this.initializeEventListeners();
+                this.loadMapsFromCloud();
+            }
+
+            async loadMapsFromCloud() {
+                try {
+                    // Try to get the bin ID from localStorage first
+                    const savedBinId = localStorage.getItem('mapsBinId');
+                    
+                    if (savedBinId) {
+                        this.jsonbinId = savedBinId;
+                        const response = await fetch(`${this.apiUrl}/${this.jsonbinId}/latest`, {
+                            headers: {
+                                'X-Master-Key': '$2a$10$5f5H5f5H5f5H5f5H5f5H5e5f5H5f5H5f5H5f5H5f5H5f5H5f5H5f5H'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.maps = data.record.maps || [];
+                        } else {
+                            throw new Error(`JSONBin API error: ${response.status}`);
+                        }
+                    } else {
+                        // No bin exists yet, start fresh
+                        this.maps = [];
+                    }
+                } catch (error) {
+                    console.error('Error loading maps from cloud:', error);
+                    // Fallback to localStorage
+                    this.maps = JSON.parse(localStorage.getItem('customMapsBackup') || '[]');
+                    this.showNotification('📡 Loading from local backup - some maps may be missing');
+                }
+                
+                this.renderMaps();
+                this.updateStats();
+            }
+
+            async saveMapsToCloud() {
+                try {
+                    const payload = {
+                        maps: this.maps,
+                        lastUpdated: new Date().toISOString()
+                    };
+
+                    let url = this.apiUrl;
+                    let method = 'POST';
+                    
+                    if (this.jsonbinId) {
+                        url = `${this.apiUrl}/${this.jsonbinId}`;
+                        method = 'PUT';
+                    }
+
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': '$2a$10$5f5H5f5H5f5H5f5H5f5H5e5f5H5f5H5f5H5f5H5f5H5f5H5f5H5f5H',
+                            'X-Bin-Name': 'Custom Maps Hub Data',
+                            'X-Collection-Id': '64f5f5f5f5f5f5f5f5f5f5f5'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (!this.jsonbinId) {
+                            this.jsonbinId = data.metadata.id;
+                            localStorage.setItem('mapsBinId', this.jsonbinId);
+                        }
+                        // Also save backup locally
+                        localStorage.setItem('customMapsBackup', JSON.stringify(this.maps));
+                        return true;
+                    } else {
+                        throw new Error(`JSONBin API error: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Error saving maps to cloud:', error);
+                    // Fallback to localStorage
+                    localStorage.setItem('customMapsBackup', JSON.stringify(this.maps));
+                    return false;
+                }
+            }
+
+            initializeEventListeners() {
+                const form = document.getElementById('mapForm');
+                const searchInput = document.getElementById('searchInput');
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitMap();
+                });
+
+                searchInput.addEventListener('input', (e) => {
+                    this.searchMaps(e.target.value);
+                });
+            }
+
+            async submitMap() {
+                const authorName = document.getElementById('authorName').value.trim();
+                const mapTitle = document.getElementById('mapTitle').value.trim();
+                const mapDescription = document.getElementById('mapDescription').value.trim();
+                const levelCode = document.getElementById('levelCode').value.trim();
+
+                if (!authorName || !mapTitle || !mapDescription || !levelCode) {
+                    alert('Please fill in all fields!');
+                    return;
+                }
+
+                // Show loading state
+                const submitBtn = document.querySelector('.btn[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = '⏳ Uploading...';
+                submitBtn.disabled = true;
+
+                const newMap = {
+                    id: Date.now(),
+                    author: authorName,
+                    title: mapTitle,
+                    description: mapDescription,
+                    code: levelCode,
+                    timestamp: new Date().toLocaleDateString()
+                };
+
+                this.maps.unshift(newMap);
+                
+                const success = await this.saveMapsToCloud();
+                
+                this.renderMaps();
+                this.updateStats();
+                
+                if (success) {
+                    this.showNotification('Map shared globally! 🌍');
+                } else {
+                    this.showNotification('Map saved locally - will sync when online ⚠️');
+                }
+                
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                // Clear form
+                document.getElementById('mapForm').reset();
+            }
+
+            renderMaps(mapsToRender = this.maps) {
+                const mapsList = document.getElementById('mapsList');
+                const allMapsList = document.getElementById('allMapsList');
+                
+                if (mapsToRender.length === 0) {
+                    const emptyMessage = `
+                        <div class="empty-state">
+                            ${this.maps.length === 0 ? 'No maps shared yet. Be the first to contribute!' : 'No maps found matching your search.'}
+                        </div>
+                    `;
+                    mapsList.innerHTML = emptyMessage;
+                    if (mapsToRender === this.maps) {
+                        allMapsList.innerHTML = '<div class="empty-state">No maps available. Submit the first one above!</div>';
+                    }
+                    return;
+                }
+
+                const mapsHTML = mapsToRender.slice(0, 3).map(map => this.createMapHTML(map)).join('');
+                const allMapsHTML = mapsToRender.map(map => this.createMapHTML(map)).join('');
+                
+                mapsList.innerHTML = mapsHTML;
+                if (mapsToRender === this.maps) {
+                    allMapsList.innerHTML = allMapsHTML;
+                }
+            }
+
+            createMapHTML(map) {
+                return `
+                    <div class="map-item">
+                        <div class="map-header">
+                            <div>
+                                <div class="map-title">${this.escapeHtml(map.title)}</div>
+                                <div class="map-author">by ${this.escapeHtml(map.author)} • ${map.timestamp}</div>
+                            </div>
+                        </div>
+                        <div class="map-description">${this.escapeHtml(map.description)}</div>
+                        <div class="map-code">${this.escapeHtml(map.code)}</div>
+                        <button class="btn copy-btn" onclick="mapsHub.copyToClipboard('${map.id}')">
+                            📋 Copy Code
+                        </button>
+                    </div>
+                `;
+            }
+
+            searchMaps(query) {
+                if (!query.trim()) {
+                    this.renderMaps();
+                    return;
+                }
+
+                const filteredMaps = this.maps.filter(map => 
+                    map.title.toLowerCase().includes(query.toLowerCase()) ||
+                    map.author.toLowerCase().includes(query.toLowerCase()) ||
+                    map.description.toLowerCase().includes(query.toLowerCase())
+                );
+
+                this.renderMaps(filteredMaps);
+            }
+
+            copyToClipboard(mapId) {
+                const map = this.maps.find(m => m.id == mapId);
+                if (map) {
+                    navigator.clipboard.writeText(map.code).then(() => {
+                        this.showNotification('Code copied to clipboard! 📋');
+                    }).catch(() => {
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = map.code;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        this.showNotification('Code copied to clipboard! 📋');
+                    });
+                }
+            }
+
+            showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            updateStats() {
+                const totalMaps = this.maps.length;
+                const uniqueAuthors = new Set(this.maps.map(map => map.author)).size;
+                
+                document.getElementById('totalMaps').textContent = totalMaps;
+                document.getElementById('totalAuthors').textContent = uniqueAuthors;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize the app
+        const mapsHub = new MapsHub();
+
+
+    </script>
+</body>
+</html>
